@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(12345);
 
-    printf("server struct set up.");
+    printf("server struct set up.\n");
 
     // Connect to remote server
     if (connect(socket_desc, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0)
@@ -35,7 +35,19 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    printf("Connected");
+    printf("Connected.\n");
+
+    // sending data to server
+    char *message = "Hello from long long time ago!!!";
+    if (send(socket_desc, message, strlen(message), 0) < 0)
+    {
+        puts("send failed.");
+        return -1;
+    }
+
+    puts("message sent.\n");
+
+    close(socket_desc);
 
     return 0;
 }

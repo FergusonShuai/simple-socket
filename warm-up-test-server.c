@@ -4,6 +4,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
+#include <arpa/inet.h>
 
 int main(int argc, char *argv[])
 {
@@ -12,6 +13,7 @@ int main(int argc, char *argv[])
     int port = 12345;
     server_desc = socket(AF_INET, SOCK_STREAM, 0);
     char *message;
+    char buffer[1024] = {0};
 
     if (server_desc < 0)
     {
@@ -46,12 +48,26 @@ int main(int argc, char *argv[])
     puts("Waiting for incoming connections...");
     socklen_t client_len = sizeof(client);
 
-    while (client_fd = accept(server_desc, (struct sockaddr *)&client, (socklen_t *)&client_len))
+    while (1)
     {
-        puts("Connection accepted");
-        // reply to the client
-        message = "I gotcha bro!!!";
-        write(client_fd, message, strlen(message));
+        printf("Waiting for connections ...\n");
+        if ((client_fd = accept(server_desc, (struct sockaddr *)&server, (socklen_t *)&client_len)) < 0)
+        {
+            perror("accept");
+            exit(EXIT_FAILURE);
+        }
+
+        // Clear the buffer and read message from client
+        memset(buffer, 0, 1024);
+        read(client_fd, buffer, 1024);
+        printf("Message from client: %s\n", buffer);
+
+        // Send a response back to client
+        write(client_fd, buffer, strlen(buffer));
+        printf("Hello message sent\n");
+
+        // Close the current connection before looping back to accept a new one
+        close(client_fd);
     }
 
     if (client_fd < 0)
